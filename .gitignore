@@ -1,0 +1,12 @@
+# Build-generated files
+.bloop
+.bsp
+.metals
+out/
+
+# IDE-generated files
+.vscode
+
+# Cache files
+node_modules/
+.cache/
