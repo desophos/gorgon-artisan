@@ -24,6 +24,8 @@ trait Content extends Data {
   val Description: String
 }
 
+type ContentProcessed = ItemProcessed | RecipeProcessed | QuestProcessed
+
 object Content {
   case class Id(value: Int)
   object Id {

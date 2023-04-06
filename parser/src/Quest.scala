@@ -55,6 +55,20 @@ object Quest {
 
   object Objective {
     sealed trait Types // can't be called Type due to name collision
+    type TypesProcessed = Types.CollectProcessed | Types.ScriptedProcessed |
+      Types.ScriptedReceiveItemProcessed | Types.ScriptAtomicIntProcessed |
+      Types.KillProcessed | Types.KillEliteProcessed | Types.HarvestProcessed |
+      Types.LootProcessed | Types.BeAttackedProcessed | Types.BuryProcessed |
+      Types.DeliverProcessed | Types.DruidKillProcessed |
+      Types.DruidScriptedProcessed | Types.GuildKillProcessed |
+      Types.GuildGiveItemProcessed | Types.GiveGiftProcessed |
+      Types.UseItemProcessed | Types.UseRecipeProcessed |
+      Types.UseAbilityProcessed | Types.UseAbilityOnTargetsProcessed |
+      Types.HaveProcessed | Types.SpecialProcessed |
+      Types.UniqueSpecialProcessed | Types.InteractionFlagProcessed |
+      Types.MultipleInteractionFlagsProcessed |
+      Types.MeetRequirementsProcessed | Types.CompleteQuestProcessed |
+      Types.SayInChatProcessed | Types.TipPlayerProcessed
     object Types {
       case class Collect(
           ItemName: Option[String], // item
@@ -434,6 +448,24 @@ object Quest {
   // )
 
   sealed trait Requirement // derives JsonTaggedAdt.PureEncoder, JsonTaggedAdt.PureDecoder {
+  type RequirementProcessed = Requirement.MinFavorProcessed |
+    Requirement.MinFavorLevelProcessed | Requirement.MinSkillLevelProcessed |
+    Requirement.ActiveCombatSkillProcessed |
+    Requirement.EquipmentSlotEmptyProcessed |
+    Requirement.InteractionFlagSetProcessed |
+    Requirement.InteractionFlagUnsetProcessed |
+    Requirement.QuestCompletedProcessed |
+    Requirement.QuestCompletedRecentlyProcessed |
+    Requirement.GuildQuestCompletedProcessed |
+    Requirement.AreaEventOffProcessed | Requirement.AreaEventOnProcessed |
+    Requirement.IsWardenProcessed | Requirement.IsLongtimeAnimalProcessed |
+    Requirement.GeneralShapeProcessed | Requirement.MoonPhaseProcessed |
+    Requirement.RuntimeBehaviorRuleSetProcessed |
+    Requirement.HangOutCompletedProcessed | Requirement.RaceProcessed |
+    Requirement.OrProcessed | Requirement.HasEffectKeywordProcessed |
+    Requirement.AppearanceProcessed | Requirement.TimeOfDayProcessed |
+    Requirement.PetCountProcessed | Requirement.EntityPhysicalStateProcessed |
+    Requirement.ScriptAtomicMatchesProcessed
   object Requirement {
     case class MinFavor(
         MinFavor: Int, // favor amount
@@ -601,6 +633,11 @@ object Quest {
     case Recipe(Recipe: String)
     case Ability(Ability: String)
   }
+
+  type RewardProcessed = Reward.SkillXpProcessed | Reward.CombatXpProcessed |
+    Reward.GuildXpProcessed | Reward.GuildCreditsProcessed |
+    Reward.CurrencyProcessed | Reward.WorkOrderCurrencyProcessed |
+    Reward.RecipeProcessed | Reward.AbilityProcessed
 
   object Reward {
     enum CurrencyType
