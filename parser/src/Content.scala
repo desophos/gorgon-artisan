@@ -209,14 +209,14 @@ def indexesToIds[C <: Content]: Map[String, C] => Map[Content.Id, C] =
     Content.Id.fromKey(id) tupleRight content
   ).logLeftCollectRight.toMap
 
-def setRefs[C <: Content](using
-    ProcessData[C]
-): Map[Content.Id, C] => Map[Content.Id, Processed[C]] =
+def setRefs[C <: Content, R <: Processed[C]](using
+    ProcessData.Aux[C, R]
+): Map[Content.Id, C] => Map[Content.Id, R] =
   _.view.mapValues(_.process).toMap
 
-def readContent[C <: Content: Decoder](json: String)(using
-    ProcessData[C]
-): Either[io.circe.Error, Map[Content.Id, Processed[C]]] =
+def readContent[C <: Content: Decoder, R <: Processed[C]](json: String)(using
+    ProcessData.Aux[C, R]
+): Either[io.circe.Error, Map[Content.Id, R]] =
   // explicit apply is required for correct implicit resolution
   getContentReader.apply(json).map(indexesToIds).map(setRefs)
 
