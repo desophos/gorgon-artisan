@@ -5,9 +5,6 @@ import scala.collection.mutable.ArraySeq
 import scala.util.Failure
 import scala.util.Success
 
-// import io.circe.generic.auto.*
-import gorgonartisan.ContentFile.getReader
-
 import cats.Show
 import cats.Show.Shown
 import cats.data.OptionT
@@ -43,11 +40,15 @@ object Http4sCdn {
   def getFileUrl(version: Int)(file: ContentFile): String =
     show"http://cdn.projectgorgon.com/v${version}/data/${file}.json"
 
-  def getFile(client: Client[IO])(
+  def getFile[C <: Content, R <: Processed[C]](using
+      client: Client[IO]
+  )(
       version: Int
   )(
       file: ContentFile
-  ): OptionT[IO, Map[Content.Id, Processed[Content]]] =
+  )(
+      reader: ContentReader[C, R]
+  ): OptionT[IO, Map[Content.Id, R]] =
     Uri
       .fromString(getFileUrl(version)(file))
       .toEitherT[IO]
@@ -59,7 +60,7 @@ object Http4sCdn {
       )
       .toOption
       .semiflatMap(uri => client.expect[String](GET(uri)))
-      .map(file.getReader)
+      .map(reader)
       .flatMapF {
         case Right(data) =>
           log.debug(
@@ -70,9 +71,16 @@ object Http4sCdn {
             *> None.pure[IO]
       }
 
-  def getFiles(client: Client[IO])(
-      files: List[ContentFile]
-  ): OptionT[IO, Map[ContentFile, Map[Content.Id, Processed[Content]]]] = for {
+  def getItems(using client: Client[IO])(version: Int) =
+    getFile(version)(ContentFile.Items)(itemReader)
+
+  def getRecipes(using client: Client[IO])(version: Int) =
+    getFile(version)(ContentFile.Recipes)(recipeReader)
+
+  def getQuests(using client: Client[IO])(version: Int) =
+    getFile(version)(ContentFile.Quests)(questReader)
+
+  def getVersion(using client: Client[IO]): OptionT[IO, Int] = for {
     v <- OptionT liftF client.expect[String](
       uri"http://client.projectgorgon.com/fileversion.txt"
     )
@@ -80,9 +88,7 @@ object Http4sCdn {
       show"Successfully fetched game version: ${v}"
     )
     vInt <- OptionT fromOption v.toIntOption
-    data <- files traverse getFile(client)(vInt)
-    _    <- OptionT liftF log.debug("Successfully parsed all files")
-  } yield Map.from(files zip data)
+  } yield vInt
 }
 
 // @experimental

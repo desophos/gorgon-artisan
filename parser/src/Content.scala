@@ -153,20 +153,14 @@ object ContentFile {
   given Show[ContentFile] = _.name
 
   val infoListFiles = List(AbilitySources, RecipeSources)
-
-  extension (file: ContentFile) {
-    def getReader: String => Either[io.circe.Error, Map[
-      Content.Id,
-      Processed[Content],
-    ]] = // ContentReader[C, R] =
-      file match {
-        case ContentFile.Items   => readContent[Item]
-        case ContentFile.Recipes => readContent[Recipe]
-        case ContentFile.Quests  => readContent[Quest]
-        case _                   => readContent[Item]
-      }
-  }
 }
+
+def itemReader: ContentReader[Item, ItemProcessed] =
+  readContent[Item, ItemProcessed]
+def recipeReader: ContentReader[Recipe, RecipeProcessed] =
+  readContent[Recipe, RecipeProcessed]
+def questReader: ContentReader[Quest, QuestProcessed] =
+  readContent[Quest, QuestProcessed]
 
 // type InfoListFile = ContentFile.AbilitySources | ContentFile.RecipeSources
 
