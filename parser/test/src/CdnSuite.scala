@@ -13,6 +13,7 @@ import cats.effect.IO
 import cats.implicits.*
 import cats.syntax.all.*
 import munit.CatsEffectSuite
+import org.http4s.client.Client
 import org.http4s.dom.FetchClientBuilder
 import scribe.*
 import scribe.cats.*
@@ -27,14 +28,18 @@ class CdnSuite extends CatsEffectSuite {
     .replace()
     .f[IO]
 
-  val client = FetchClientBuilder[IO].create
+  given Client[IO] = FetchClientBuilder[IO].create
 
-  test("files are downloaded") {
-    Http4sCdn
-      .getFiles(client)(
-        List(ContentFile.Items, ContentFile.Recipes, ContentFile.Quests)
-      )
-      .value
-      .map(data => assert(data.isDefined))
+  test("files are downloaded and parsed") {
+    for {
+      v       <- Http4sCdn.getVersion
+      items   <- Http4sCdn.getItems(v)
+      recipes <- Http4sCdn.getRecipes(v)
+      quests  <- Http4sCdn.getQuests(v)
+    } yield {
+      assert(items.size > 0)
+      assert(recipes.size > 0)
+      assert(quests.size > 0)
+    }
   }
 }
