@@ -68,7 +68,7 @@ object parser extends ScalaJSModule with ScalafmtModule {
     ivy"com.outr::scribe-cats::$scribeV",
   )
 
-  object test extends Tests with TestModule.Munit {
+  object test extends ScalaJSTests with TestModule.Munit {
     def munitV           = "1.0.0-M7"
     def munitCatsEffectV = "2.0.0-M3"
 
